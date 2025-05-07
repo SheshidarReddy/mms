@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Mess Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gray-100 p-6">
+  <h2 class="text-2xl font-bold mb-6">Admin Dashboard</h2>
+  <div class="bg-white p-6 rounded shadow">
+    <h3 class="text-xl font-semibold mb-4">Student List</h3>
+    <table class="w-full border-collapse">
+      <thead>
+        <tr class="bg-gray-200">
+          <th class="border p-2">Name</th>
+          <th class="border p-2">Email</th>
+          <th class="border p-2">Attendance</th>
+          <th class="border p-2">Fees</th>
+        </tr>
+      </thead>
+      <tbody id="student-table-body"></tbody>
+    </table>
+  </div>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = 'login.html';
+    }
+
+    fetch('http://127.0.0.1:3000/api/users/students', {
+      headers: { 'Authorization': `Bearer ${token}` },
+    })
+      .then(res => {
+        if (!res.ok) {
+          localStorage.removeItem('token');
+          window.location.href = 'login.html';
+        }
+        return res.json();
+      })
+      .then(students => {
+        const tableBody = document.getElementById('student-table-body');
+        students.forEach(student => {
+          const row = document.createElement('tr');
+          row.className = 'border';
+          row.innerHTML = `
+            <td class="border p-2">${student.name}</td>
+            <td class="border p-2">${student.email}</td>
+            <td class="border p-2">${student.attendanceStatus}</td>
+            <td class="border p-2">${student.feeStatus}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+      })
+      .catch(err => {
+        console.error('Error fetching students:', err);
+        localStorage.removeItem('token');
+        window.location.href = 'login.html';
+      });
+  </script>
+</body>
+</html>

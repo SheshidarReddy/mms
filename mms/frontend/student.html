@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard - Mess Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gray-100 p-6">
+  <h2 class="text-2xl font-bold mb-6">Student Dashboard</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-white p-6 rounded shadow">
+      <h3 class="text-xl font-semibold mb-4">Attendance</h3>
+      <ul id="attendance-list"></ul>
+    </div>
+    <div class="bg-white p-6 rounded shadow">
+      <h3 class="text-xl font-semibold mb-4">Fee Status</h3>
+      <ul id="fees-list"></ul>
+    </div>
+  </div>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = 'login.html';
+    }
+
+    fetch('http://127.0.0.1:3000/api/users/me', {
+      headers: { 'Authorization': `Bearer ${token}` },
+    })
+      .then(res => {
+        if (!res.ok) {
+          localStorage.removeItem('token');
+          window.location.href = 'login.html';
+        }
+        return res.json();
+      })
+      .then(data => {
+        const attendanceList = document.getElementById('attendance-list');
+        const feesList = document.getElementById('fees-list');
+
+        data.attendance.forEach(record => {
+          const li = document.createElement('li');
+          li.className = 'mb-2';
+          li.textContent = `${record.date}: ${record.status}`;
+          attendanceList.appendChild(li);
+        });
+
+        data.fees.forEach(fee => {
+          const li = document.createElement('li');
+          li.className = 'mb-2';
+          li.textContent = `${fee.month}: ${fee.status}`;
+          feesList.appendChild(li);
+        });
+      })
+      .catch(err => {
+        console.error('Error fetching data:', err);
+        localStorage.removeItem('token');
+        window.location.href = 'login.html';
+      });
+  </script>
+</body>
+</html>
